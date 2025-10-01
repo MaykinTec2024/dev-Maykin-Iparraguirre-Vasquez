@@ -1,0 +1,39 @@
+1. Realizar un proyecto/servicio en Quarkus con las siguientes consideraciones:
+S.a)
+-metodo POST 
+-tipo text
+-exponer en path "/api/v1/test"
+-recibe 5 parametros tipo String
+-retornar como respuesta la concatenacion de los parametros
+-controlar que estas entradas que no sean nulos ni blancos y para evitar sql injection
+-despliegue en el puerto http: 15050
+-pruebas en el puerto http: 15055
+-permitir conexiones inseguras
+-permitir CORS
+-configurar logs maximo 10MB, 3 rotaciones, tipo asincrono.
+-crear un archivo start.sh para desplegar el servicio localmente y permitir inyectar un archivo application.properties
+S.b)
+Configurar un cliente rest para consumir el siguiente endpoint con lo siguiente:
+-metodo: GET
+-tipo JSON
+-exponer en path "api/v2/move"
+-consumir un JSON -> GET https://pokeapi.co/api/v2/move
+-permitir propagación de cabeceras
+-implementar 2 estrategias de tolerancia a fallos
+S.c)
+Implementar y configurar una tarea periódica para llamar al servicio en "S.b)" cada 5 minutos (este tiempo debe estar en formato cron y debe ser configurable).
+S.d)
+Realizar un diagrama de clases de los servicios creados.
+Consideraciones Generales:
+-no usar A.I.
+-realizar con jdk 17
+-control de excepciones adecuado.
+-crear un archivo test.sh que ejecute pruebas unitarias y de integracion que prueben los apis generados (solo casos ok).
+-implementar interceptores de entrada y salida y loggear la data
+-aplicar principios de codigo limpio, seguro y eficiente
+-documentar adecuadamente los métodos, servicios y apis creadas (configurar swagger para usar en dev, para prod no debe permitirse)
+-se debe hacer uso del bus de eventos de quarkus, para  "S.a)" bloqueante y para "S.b)" no bloqueante
+-crear las capas  necesarias para implementar estos servicios
+Nota: Se debe usar anotaciones propias de Quarkus, Microprofile y Mutiny, ademas crear un archivo readme y detallar lo necesario para el despliegue del servicio.
+se puede usar lombook y apache libraries.
+Una vez finalizado el servicio, realizar un solo commit con la conveción de git y finalmente push.

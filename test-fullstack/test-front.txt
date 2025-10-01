@@ -1,0 +1,51 @@
+Construir una aplicación móvil en React Native que consuma y visualice los datos del backend implementado en Quarkus. La app debe:
+1.	Consumir el endpoint REST del backend Quarkus (S.a) que recibe 5 parámetros tipo String.
+Renderizar los datos del JSON obtenido del endpoint externo (S.b) en una tabla.
+2.	Ejecutar una tarea periódica (S.c) usando un calendario/scheduler configurable desde la UI.
+3.	Consumir una mutación GraphQL conectada a un bus de eventos en AWS para publicar algún cambio de estado o entrada del usuario (ej: acción sobre el JSON).
+
+Funcionalidades que debe implementar
+1. Pantalla: "Concatenador de Strings"
+●	Formulario con 5 inputs.
+●	Al enviar, hace un POST a /api/v1/test del backend Quarkus.
+●	Muestra el resultado concatenado en la pantalla.
+Validar campos vacíos o solo con espacios.
+●	Enviar mediante fetch o axios.
+●	Soporte offline-first (usando AsyncStorage o react-query).
+
+2. Pantalla: "Movimientos"
+●	Botón: "Cargar movimientos".
+●	Hace GET a https://pokeapi.co/api/v2/move.
+Renderiza los datos (nombre, tipo, precisión, etc.) en una tabla interactiva (scroll horizontal o paginación).
+Mostrar loading, error y retry.
+●	Usar FlatList, SectionList o algún componente custom table ( en versión móvil) , en versión escritorio crear un HOC reutilizable.
+
+3. Pantalla: "Tarea Programada"
+●	Muestra un calendario o selector de tiempo.
+Permite configurar intervalo de ejecución (ej: cada 5 mins).
+●	Ejecuta una función que llama a /api/v2/move y guarda los movimientos localmente o los muestra en pantalla.
+●	Usa setInterval/background task según plataforma.
+4. Pantalla: "Publicar Evento"
+●	Conecta con un bus de eventos (puede simularse usando AppSync con AWS Amplify).
+●	Publica una mutación GraphQL con los datos que seleccione el usuario desde la tabla.
+●	Muestra en un modal una confirmación de éxito/error.
+●	Incluir el evento de suscripción con renderizado inmediato si los datos cambian.
+
+Herramientas
+●	React Native (TypeScript)
+
+●	Apollo Client para GraphQL.
+
+●	GraphQL schema generado desde codegen.
+
+●	AWS Amplify para conectar AppSync.
+
+●	react-native-calendars para el calendario.
+
+●	Validaciones con yup, formik , o propias.
+
+●	Lógica asíncrona con React Query o axios/fetch.
+
+ README debe explicar:
+●	Cómo levantar el proyecto (yarn, npm run start)
+●	Comandos útiles para desarrollo y pruebas.
