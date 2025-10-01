@@ -1,0 +1,57 @@
+@startuml Services Layer - Simplified
+
+!theme amiga
+title **Banco Application - Services Layer Architecture**
+
+package "Services Layer" {
+    class PokemonService <<@ApplicationScoped>> {
+        --Injected Dependencies--
+        - pokemonApiClient: PokemonApiClient
+        - eventBus: EventBus
+        ==
+        --Public Methods--
+        + getPokemonMoves(): Uni<PokemonMoveResponse>
+        ==
+        --Fault Tolerance--
+        @Retry(maxRetries=3)
+        @CircuitBreaker
+        @Timeout(30s)
+    }
+
+    class TextConcatenationService <<@ApplicationScoped>> {
+        --Injected Dependencies--
+        - validationService: ValidationService
+        - eventBus: EventBus
+        ==
+        --Public Methods--
+        + concatenateText(request): TextConcatenationResponse
+    }
+
+    class ValidationService <<@ApplicationScoped>> {
+        --Static Fields--
+        - SQL_INJECTION_PATTERN: Pattern
+        ==
+        --Public Methods--
+        + validateStringParameter(value, paramName): void
+        + validateTextConcatenationParams(...): void
+    }
+}
+
+' Service Dependencies
+TextConcatenationService ..> ValidationService : <<uses>>
+PokemonService ..> "External API" : <<calls>>
+
+' Flow annotations
+TextConcatenationService : 1. Validates input
+TextConcatenationService : 2. Concatenates strings
+TextConcatenationService : 3. Publishes event
+
+PokemonService : 1. Calls Pokemon API
+PokemonService : 2. Handles failures
+PokemonService : 3. Publishes success event
+
+ValidationService : 1. Checks for null/blank
+ValidationService : 2. Prevents SQL injection
+ValidationService : 3. Throws ValidationException
+
+@enduml

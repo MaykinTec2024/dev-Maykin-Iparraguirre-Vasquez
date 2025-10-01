@@ -1,0 +1,143 @@
+@startuml Services Class Diagram
+
+!define LIGHTBLUE #E3F2FD
+!define LIGHTGREEN #E8F5E8
+!define LIGHTYELLOW #FFF8E1
+!define LIGHTPINK #FCE4EC
+
+title **Banco Application - Services Class Diagram**
+
+package "com.banco.service" LIGHTBLUE {
+    class PokemonService {
+        - pokemonApiClient: PokemonApiClient
+        - eventBus: EventBus
+        --
+        + getPokemonMoves(): Uni<PokemonMoveResponse>
+        --
+        **Annotations:**
+        @ApplicationScoped
+        @Slf4j
+        @Retry(maxRetries = 3, delay = 1000)
+        @CircuitBreaker(requestVolumeThreshold = 4, failureRatio = 0.5, delay = 5000)
+        @Timeout(value = 30, unit = ChronoUnit.SECONDS)
+    }
+
+    class TextConcatenationService {
+        - validationService: ValidationService
+        - eventBus: EventBus
+        --
+        + concatenateText(request: TextConcatenationRequest): TextConcatenationResponse
+        --
+        **Annotations:**
+        @ApplicationScoped
+        @Slf4j
+    }
+
+    class ValidationService {
+        - {static} SQL_INJECTION_PATTERN: Pattern
+        --
+        + validateStringParameter(value: String, paramName: String): void
+        + validateTextConcatenationParams(param1: String, param2: String, param3: String, param4: String, param5: String): void
+        --
+        **Annotations:**
+        @ApplicationScoped
+    }
+}
+
+package "com.banco.client" LIGHTGREEN {
+    interface PokemonApiClient {
+        --
+        + getMoves(): Uni<PokemonMoveResponse>
+        --
+        **Annotations:**
+        @RegisterRestClient(configKey = "pokemon-api")
+        @Path("/api/v2")
+    }
+}
+
+package "com.banco.dto" LIGHTYELLOW {
+    class PokemonMoveResponse {
+        + count: Integer
+        + next: String
+        + previous: String
+        + results: List<Object>
+    }
+
+    class TextConcatenationRequest {
+        + param1: String
+        + param2: String
+        + param3: String
+        + param4: String
+        + param5: String
+    }
+
+    class TextConcatenationResponse {
+        + result: String
+        + message: String
+        --
+        + TextConcatenationResponse(result: String, message: String)
+    }
+}
+
+package "com.banco.exception" LIGHTPINK {
+    class ValidationException {
+        --
+        + ValidationException(message: String)
+        + ValidationException(message: String, cause: Throwable)
+    }
+}
+
+package "External Dependencies" {
+    class EventBus <<Vert.x>> {
+        + send(address: String, message: Object): void
+        + requestAndAwait(address: String, message: Object): Object
+    }
+}
+
+' Relationships
+PokemonService --> PokemonApiClient : uses
+PokemonService --> EventBus : injects
+PokemonService --> PokemonMoveResponse : returns
+
+TextConcatenationService --> ValidationService : injects
+TextConcatenationService --> EventBus : injects
+TextConcatenationService --> TextConcatenationRequest : receives
+TextConcatenationService --> TextConcatenationResponse : returns
+
+ValidationService --> ValidationException : throws
+
+' Inheritance
+ValidationException --|> RuntimeException : extends
+
+' Notes
+note right of PokemonService
+  Implements fault tolerance strategies:
+  • Circuit Breaker
+  • Retry mechanism
+  • Timeout control
+  
+  Uses non-blocking event publishing
+end note
+
+note right of TextConcatenationService
+  Orchestrates text processing:
+  • Input validation via ValidationService
+  • String concatenation logic
+  • Synchronous event publishing
+end note
+
+note right of ValidationService
+  Security-focused validation:
+  • Null/blank checks
+  • SQL injection prevention
+  • Input sanitization
+end note
+
+note bottom of EventBus
+  Vert.x Event Bus provides:
+  • Asynchronous messaging
+  • Request-response patterns
+  • Event-driven architecture
+end note
+
+@enduml
